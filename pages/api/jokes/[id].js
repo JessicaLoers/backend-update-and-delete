@@ -3,35 +3,39 @@ import Joke from "../../../db/models/Joke";
 
 export default async function handler(request, response) {
   await dbConnect();
-  const { id } = request.query;
 
-  if (request.method === "GET") {
-    const joke = await Joke.findById(id);
+  try {
+    const { id } = request.query;
 
-    if (!joke) {
-      return response.status(404).json({ status: "Not Found" });
+    if (request.method === "GET") {
+      const joke = await Joke.findById(id);
+      if (!joke) {
+        return response
+          .status(404)
+          .json({ status: "error", message: "Not Found" });
+      }
+      response.status(200).json(joke);
+    } else if (request.method === "PUT") {
+      const jokeData = request.body;
+      await Joke.findByIdAndUpdate(id, jokeData);
+      response
+        .status(200)
+        .json({ status: "success", message: "Joke updated!" });
+    } else if (request.method === "DELETE") {
+      await Joke.findByIdAndDelete(id);
+      response
+        .status(200)
+        .json({ status: "success", message: "Joke deleted!" });
+    } else {
+      response
+        .status(405)
+        .json({ status: "error", message: "Method not allowed" });
     }
-
-    response.status(200).json(joke);
-  }
-
-  // ☝️ Simple, less secure way without error handling
-
-  // Check if the request is a PUT method
-  if (request.method === "PUT") {
-    // Get the joke data from the request body
-    const jokeData = request.body;
-    // Update the joke in the database with the given ID and new data
-    await Joke.findByIdAndUpdate(id, jokeData);
-    // Return a 200 status indicating the joke has been updated
-    return response.status(200).json({ status: "Joke updated!" });
-  }
-
-  // Check if the request is a DELETE method
-  if (request.method === "DELETE") {
-    // Delete the joke with the specified ID from the database
-    await Joke.findByIdAndDelete(id);
-    // Return a success message
-    return response.json({ message: "success!" });
+  } catch (error) {
+    response.status(500).json({
+      status: "error",
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 }

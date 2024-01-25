@@ -11,52 +11,29 @@ export default function Joke() {
 
   const { data: joke, isLoading, mutate } = useSWR(`/api/jokes/${id}`);
 
-  // Define an asynchronous function to handle the edit operation
   async function handleEdit(event) {
     event.preventDefault();
 
     const formData = new FormData(event.target);
     const jokeData = Object.fromEntries(formData);
 
-    /*
-    Send a PUT request to the server with the jokeData
-    The request is sent to a specific joke's endpoint, identified by `"id"
-    */
     const response = await fetch(`/api/jokes/${id}`, {
-      // Specify the HTTP method (PUT for updating data 🙂)
       method: "PUT",
-      // Set headers to indicate JSON content
       headers: { "Content-Type": "application/json" },
-      // Convert the joke data object to a JSON string
       body: JSON.stringify(jokeData),
     });
 
-    /* 
-    Check if the response status is "OK" ➡️ (status code 200-299) that indicates that the request was successful
-    */
     if (response.ok) {
-      /* 
-      Call SWR's "mutate function" to revalidate and update local data
-      helps in synchronizing the local UI state with the server state.
-      */
       mutate();
     }
   }
 
-  // Define an asynchronous function to handle the delete operation
   async function handleDelete() {
-    /* 
-    Send a DELETE request to the server for a specific joke.
-    The request is sent to the joke's endpoint, identified by "id".
-    */
     const response = await fetch(`/api/jokes/${id}`, {
       method: "DELETE",
     });
-    // Check if the response is successful  (status code 200-299)
     if (response.ok) {
-      // If the response is successful navigate to the home page ('/'), by using  next.js push() methoth of the useRouter-Hook
       router.push("/");
-      // Return from the function to prevent further execution
       return;
     }
   }
