@@ -6,6 +6,7 @@ import JokeList from "../components/JokeList";
 export default function HomePage() {
   const { mutate } = useSWR("/api/jokes");
 
+  // create a new joke
   async function handleSubmit(event) {
     event.preventDefault();
 
